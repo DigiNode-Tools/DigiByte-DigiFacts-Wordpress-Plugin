@@ -226,13 +226,16 @@ function digibyte_digifacts_display_shortcode($atts) {
         return 'No DigiFacts available at the moment.';
     }
 
+    // Get the selected display option from the settings
+    $display = get_option('digibyte_digifacts_display', 'box');
+
     $random_key = array_rand($facts);
     $fact = $facts[$random_key];
 
     ob_start();
     ?>
-    <div class="digibyte-digifact">
-        <h4 class="digifact-title"><?php echo esc_html($fact['title']); ?></h4>
+    <div class="digibyte-digifact <?php echo ($display === 'box') ? 'with-box' : ''; ?>">
+        <h5 class="digifact-title"><?php echo esc_html($fact['title']); ?></h5>
         <div class="digifact-content"><?php echo wp_kses_post($fact['content']); ?></div>
     </div>
     <?php
@@ -240,4 +243,85 @@ function digibyte_digifacts_display_shortcode($atts) {
     return $content;
 }
 add_shortcode('digifacts', 'digibyte_digifacts_display_shortcode');
+
+function digibyte_digifacts_enqueue_styles() {
+    // Enqueue the custom CSS file for DigiFacts
+    wp_enqueue_style('digifacts-styles', plugins_url('digifacts-styles.css', __FILE__), array(), '1.0');
+
+    // Check the display option from the plugin settings.
+    $display = get_option('digibyte_digifacts_display', 'box');
+
+    // Conditionally enqueue the additional styles based on the display option.
+    if ($display === 'box') {
+        wp_enqueue_style('digifacts-styles-box', false, array(), '1.0');
+        wp_add_inline_style('digifacts-styles-box', '
+            /* Additional styles for digifacts with the box border */
+            .digibyte-digifact.with-box {
+                /* Add any other styling you want for the box here */
+            }
+            
+            /* Additional styling for the DigiFact content inside the box */
+            .digibyte-digifact.with-box .digifact-content {
+                /* Add styling for content inside the box here */
+            }
+        ');
+    } else {
+        wp_enqueue_style('digifacts-styles-no-box', false, array(), '1.0');
+        wp_add_inline_style('digifacts-styles-no-box', '
+            /* Styles for digifacts without the box border */
+            .digibyte-digifact {
+                /* Add styling for digifacts without the box here */
+            }
+            
+            /* Additional styling for the DigiFact content without the box */
+            .digibyte-digifact .digifact-content {
+                /* Add styling for content without the box here */
+            }
+        ');
+    }
+}
+add_action('wp_enqueue_scripts', 'digibyte_digifacts_enqueue_styles');
+
+
+function digibyte_digifacts_enqueue_scripts() {
+    // Correct the handle to match your enqueued script handle
+    wp_enqueue_script('digifact-refresh', plugin_dir_url(__FILE__) . 'js/digifact-refresh.js', array('jquery'), '1.0', true);
+    
+    // Localize the script with new data
+    wp_localize_script('digifact-refresh', 'digibyte_digifacts_ajax_params', array(
+        'ajaxurl' => admin_url('admin-ajax.php'), // This will make `ajaxurl` available in the script
+        'nonce' => wp_create_nonce('digibyte_digifacts_nonce') // Create a nonce and pass it to the script
+    ));
+}
+add_action('wp_enqueue_scripts', 'digibyte_digifacts_enqueue_scripts');
+
+
+// handle the AJAX request and return the updated DigiFact content
+function digibyte_digifacts_ajax_refresh() {
+    check_ajax_referer('digibyte_digifacts_nonce', 'nonce');
+    // Fetch a new DigiFact
+    $language = get_option('digibyte_digifacts_language', 'en');
+    $facts = digibyte_digifacts_fetch_facts($language);
+
+    if ($facts) {
+        $random_key = array_rand($facts);
+        $fact = $facts[$random_key];
+
+        $response = array(
+            'title' => esc_html($fact['title']),
+            'content' => wp_kses_post($fact['content']),
+        );
+
+        wp_send_json_success($response);
+    } else {
+        wp_send_json_error('No DigiFacts available at the moment.');
+    }
+}
+
+add_action('wp_ajax_digibyte_digifacts_ajax_refresh', 'digibyte_digifacts_ajax_refresh');
+add_action('wp_ajax_nopriv_digibyte_digifacts_ajax_refresh', 'digibyte_digifacts_ajax_refresh');
+
+
+
+
 

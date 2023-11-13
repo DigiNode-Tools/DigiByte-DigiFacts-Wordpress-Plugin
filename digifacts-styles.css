@@ -1,0 +1,24 @@
+/* Styles for digifacts with the box border */
+.digibyte-digifact.with-box {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px; /* You can adjust this margin value to control the space between boxes */
+    /* Add any other styling you want for the box here */
+}
+
+/* Additional styling for the DigiFact content inside the box */
+.digibyte-digifact.with-box .digifact-content {
+    /* Add styling for content inside the box here */
+}
+
+/* Adjust the title's margin and padding to reduce white space */
+.digibyte-digifact.with-box .digifact-title {
+    margin: 0; /* Set margin to 0 to remove space above the title */
+    padding: 5px 0; /* Adjust the top and bottom padding to control spacing around the title */
+}
+
+/* Adjust the title's margin and padding to reduce white space */
+.digibyte-digifact .digifact-title {
+    margin: 0; /* Set margin to 0 to remove space above the title */
+    padding: 5px 0; /* Adjust the top and bottom padding to control spacing around the title */
+}
