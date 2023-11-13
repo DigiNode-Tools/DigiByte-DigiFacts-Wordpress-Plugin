@@ -19,6 +19,9 @@ function digibyte_digifacts_settings_page() {
     // Show any settings errors that were added
     settings_errors('digibyte_digifacts_languages');
 
+    //qrcode url
+    $qrcode_url = plugins_url('qrcode.png', __FILE__);
+
     ?>
     <div class="wrap">
         <h2>DigiByte DigiFacts Settings</h2>
@@ -30,11 +33,20 @@ function digibyte_digifacts_settings_page() {
             ?>
         </form>
         <div>
-            <h3>Shortcode Usage</h3>
-            <p>To display DigiFacts on your site, use the shortcode <code>[digifacts]</code> in your posts or pages.</p>
+            <h3>Usage</h3>
+            <p>To display DigiFacts on your site, use the shortcode <code>[digifacts]</code> in your posts or pages. You can also use the provided gutenberg block.</p>
+            <img src="<?php echo esc_url($qrcode_url); ?>" alt="DigiByte DigiFacts Translation Fund QR Code" align="right"><h3>Please Contribute</h3>
+            <p>Please help DigiByte reach more people around the world by donating to the <a href="https://github.com/saltedlolly/DigiByte-DigiFacts-JSON#donate-to-the-digifacts-translation-fund" target="_blank">DigiFacts Translation Fund</a>.</p>
+            <ul>
+            <li>- For every 12,500 DGB that is donated, DigiFacts will be translated into five additional languages.</li>
+            <li>- Anyone who donates 2500 DGB or more gets to choose a language to translate to.</li>
+            </ul>
+            <p>Donate here: <strong>dgb1qrgmuy24pj738tuc64wl30us9u8g2ywq3tclsjv</strong></p>
+            <p>You can also help by contributing new DigiFacts or helping to translate them yourself. Go <a href="https://github.com/saltedlolly/DigiByte-DigiFacts-JSON" target="_blank">here</a> to learn more.</p>
             <h3>Styling the DigiFacts</h3>
-            <p>You can style the DigiFacts title and content with CSS. Add custom styles to your theme's stylesheet or in the Customizer under Additional CSS.</p>
-            <pre>
+    <p>You can style the DigiFacts title and content with CSS. Add custom styles to your theme's stylesheet or in the Customizer under Additional CSS.</p>
+    <h4>General Styles</h4>
+    <pre>
 .digibyte-digifact .digifact-title {
     font-size: 24px;
     color: #333;
@@ -43,9 +55,39 @@ function digibyte_digifacts_settings_page() {
     font-size: 16px;
     color: #666;
 }
-            </pre>
-            <p>Replace the font-size and color values with your own preferences.</p>
-        </div>
+    </pre>
+    <p>Replace the font-size and color values with your own preferences.</p>
+    
+    <h4>Styles for Boxed DigiFacts</h4>
+    <pre>
+.digibyte-digifact.with-box {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+}
+.digibyte-digifact.with-box .digifact-title {
+    margin-top: 0;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee;
+}
+.digibyte-digifact.with-box .digifact-content {
+    padding-top: 10px;
+}
+    </pre>
+    <p>Add the above styles if you choose the 'Box' display option to give a boxed appearance to the DigiFacts.</p>
+    
+    <h4>Styles for Text-Only DigiFacts</h4>
+    <pre>
+.digibyte-digifact.without-box .digifact-title,
+.digibyte-digifact.without-box .digifact-content {
+    padding: 0;
+    border: none;
+    background-color: transparent;
+}
+    </pre>
+    <p>Use the above styles if you select the 'Text Only' display option to remove the box and display only the text.</p>
+</div>
     </div>
     <?php
 }
@@ -295,7 +337,6 @@ function digibyte_digifacts_enqueue_scripts() {
 }
 add_action('wp_enqueue_scripts', 'digibyte_digifacts_enqueue_scripts');
 
-
 // handle the AJAX request and return the updated DigiFact content
 function digibyte_digifacts_ajax_refresh() {
     check_ajax_referer('digibyte_digifacts_nonce', 'nonce');
@@ -321,7 +362,25 @@ function digibyte_digifacts_ajax_refresh() {
 add_action('wp_ajax_digibyte_digifacts_ajax_refresh', 'digibyte_digifacts_ajax_refresh');
 add_action('wp_ajax_nopriv_digibyte_digifacts_ajax_refresh', 'digibyte_digifacts_ajax_refresh');
 
+// Register gutenberg block
+function digibyte_digifacts_register_block() {
+    register_block_type('digibyte/digifacts', array(
+        'render_callback' => 'digibyte_digifacts_display_shortcode', // Reuse the shortcode rendering function
+    ));
+}
 
+add_action('init', 'digibyte_digifacts_register_block');
 
+// Enqueue gutenberg block assets
+function digibyte_digifacts_enqueue_block_editor_assets() {
+    wp_enqueue_script(
+        'digibyte-digifacts-block-editor',
+        plugin_dir_url(__FILE__) . 'js/block.js', // Path to your block.js
+        array('wp-blocks', 'wp-element', 'wp-editor'), // Dependencies
+        '1.0',
+        true
+    );
+}
+add_action('enqueue_block_editor_assets', 'digibyte_digifacts_enqueue_block_editor_assets');
 
-
+// 
