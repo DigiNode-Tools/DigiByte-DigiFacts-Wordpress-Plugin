@@ -51,33 +51,11 @@ function digibyte_digifacts_settings_page() {
 }
 
 
-function digibyte_digifacts_get_facts($language = 'en') {
-    $cache_key = 'digibyte_digifacts_facts_' . $language;
-    $facts = get_transient($cache_key);
-    
-    if (false === $facts) {
-        $response = wp_remote_get("https://digifacts.digibyte.help/?lang=$language");
-        
-        if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
-            // Debugging line: log the error
-            error_log('DigiFacts API Error: ' . wp_remote_retrieve_response_code($response));
-            $facts = 'ERROR: DigiFacts web service cannot be reached.';
-        } else {
-            $facts = json_decode(wp_remote_retrieve_body($response), true);
-            // Debugging line: log the response
-            error_log('DigiFacts API Response: ' . print_r($facts, true));
-            set_transient($cache_key, $facts, 15 * MINUTE_IN_SECONDS);
-        }
-    }
-    
-    return $facts;
-}
-
 add_action('updated_option', 'digibyte_digifacts_updated_option', 10, 3);
 function digibyte_digifacts_updated_option($option_name, $old_value, $value) {
     if ('digibyte_digifacts_language' === $option_name) {
         // Fetch and cache new facts when the language option is updated.
-        digibyte_digifacts_get_facts($value);
+        digibyte_digifacts_fetch_facts($value);
     }
 }
 
@@ -255,7 +233,7 @@ function digibyte_digifacts_display_shortcode($atts) {
     ?>
     <div class="digibyte-digifact">
         <h4 class="digifact-title"><?php echo esc_html($fact['title']); ?></h4>
-        <p class="digifact-content"><?php echo esc_html($fact['content']); ?></p>
+        <div class="digifact-content"><?php echo wp_kses_post($fact['content']); ?></div>
     </div>
     <?php
     $content = ob_get_clean();
