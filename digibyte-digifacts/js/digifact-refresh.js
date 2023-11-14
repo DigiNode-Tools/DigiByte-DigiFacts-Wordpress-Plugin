@@ -1,4 +1,18 @@
 jQuery(document).ready(function ($) {
+
+    // Check if language was changed on page load
+    var languageChanged = digibyte_digifacts_ajax_params.languageChanged;
+    
+    if (languageChanged) {
+        localStorage.removeItem('digifacts');
+        localStorage.removeItem('digifacts_timestamp');
+        // You may also want to remove the transient flag as it's no longer needed
+        $.post(digibyte_digifacts_ajax_params.ajaxurl, {
+            action: 'clear_language_changed_flag',
+            nonce: digibyte_digifacts_ajax_params.nonce
+        });
+    }
+
     function storeDigiFacts(data) {
         // Store in local storage with a timestamp
         localStorage.setItem('digifacts', JSON.stringify(data));
@@ -64,8 +78,11 @@ jQuery(document).ready(function ($) {
         $('.digifact-content').html(fact.content);
     }    
 
-    // Initial refresh when the page loads
-    refreshDigiFact();
+    // Check if the facts are already valid in local storage before setting the interval
+    if (!getDigiFacts() || !isCacheValid()) {
+        // If not, fetch new facts immediately
+        refreshDigiFact();
+    }
 
     // Optionally, you might want to refresh the DigiFact from local storage more frequently
     setInterval(refreshDigiFact, 60000); // Refresh every 60 seconds

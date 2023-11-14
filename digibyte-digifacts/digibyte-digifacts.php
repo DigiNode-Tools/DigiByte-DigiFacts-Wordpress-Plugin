@@ -3,7 +3,7 @@
 * Plugin Name:   DigiByte DigiFacts
 * Plugin URI:    https://github.com/saltedlolly/DigiByte-DigiFacts-Wordpress-Plugin
 * Description:   Display random DigiFacts about DigiByte in multiple languages.
-* Version:       1.1
+* Version:       1.2
 * Author:        Olly Stedall (DigiByte.Help)
 * Text Domain:   digibyte-digifacts
 */
@@ -113,11 +113,12 @@ function digibyte_digifacts_settings_page() {
 
 add_action('updated_option', 'digibyte_digifacts_updated_option', 10, 3);
 function digibyte_digifacts_updated_option($option_name, $old_value, $value) {
-    if ('digibyte_digifacts_language' === $option_name) {
-        // Fetch and cache new facts when the language option is updated.
-        digibyte_digifacts_fetch_facts($value);
+    if ('digibyte_digifacts_language' === $option_name && $old_value !== $value) {
+        // Language has changed, so set a transient to clear local storage
+        set_transient('digibyte_digifacts_language_changed', 1, 5 * MINUTE_IN_SECONDS);
     }
 }
+
 
 function digibyte_digifacts_settings_section_cb() {
     echo '<p>Set your preferences for the DigiByte DigiFacts plugin here.</p>';
@@ -349,9 +350,15 @@ function digibyte_digifacts_enqueue_scripts() {
     
     // Localize the script with new data
     wp_localize_script('digifact-refresh', 'digibyte_digifacts_ajax_params', array(
-        'ajaxurl' => admin_url('admin-ajax.php'), // This will make `ajaxurl` available in the script
-        'nonce' => wp_create_nonce('digibyte_digifacts_nonce') // Create a nonce and pass it to the script
+        'ajaxurl' => admin_url('admin-ajax.php'),
+        'nonce' => wp_create_nonce('digibyte_digifacts_nonce'),
+        'languageChanged' => get_transient('digibyte_digifacts_language_changed') ? true : false
     ));
+
+    // If the language has changed, clear the transient
+    if (get_transient('digibyte_digifacts_language_changed')) {
+        delete_transient('digibyte_digifacts_language_changed');
+    }
 }
 add_action('wp_enqueue_scripts', 'digibyte_digifacts_enqueue_scripts');
 
@@ -400,4 +407,11 @@ function digibyte_digifacts_enqueue_block_editor_assets() {
 }
 add_action('enqueue_block_editor_assets', 'digibyte_digifacts_enqueue_block_editor_assets');
 
-// 
+
+function clear_language_changed_flag() {
+    check_ajax_referer('digibyte_digifacts_nonce', 'nonce');
+    delete_transient('digibyte_digifacts_language_changed');
+    wp_send_json_success();
+}
+add_action('wp_ajax_clear_language_changed_flag', 'clear_language_changed_flag');
+
