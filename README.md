@@ -25,4 +25,4 @@ Donate here: **dgb1qrgmuy24pj738tuc64wl30us9u8g2ywq3tclsjv**
 
 ![DigiFact Translation Fund](digibyte-digifacts/qrcode.png)
 
-You can monitor the current donations here.
+You can monitor the current donations [here](https://digibyteblockexplorer.com/address/dgb1qrgmuy24pj738tuc64wl30us9u8g2ywq3tclsjv).
