@@ -2,7 +2,7 @@
 /*
 Plugin Name: DigiByte DigiFacts
 Description: Display random DigiFacts about DigiByte in multiple languages.
-Version: 1.0
+Version: 1.1
 Author: Olly Stedall (DigiByte.Help)
 */
 
@@ -245,7 +245,7 @@ function digibyte_digifacts_fetch_facts($language) {
         json_decode($body);
         if (json_last_error() === JSON_ERROR_NONE) {
             $facts = json_decode($body, true);
-            set_transient($transient_key, $facts, 5 * MINUTE_IN_SECONDS);
+            set_transient($transient_key, $facts, 60 * MINUTE_IN_SECONDS);
         } else {
             error_log('Error decoding DigiFacts: ' . json_last_error_msg());
             return false;
@@ -340,20 +340,19 @@ add_action('wp_enqueue_scripts', 'digibyte_digifacts_enqueue_scripts');
 // handle the AJAX request and return the updated DigiFact content
 function digibyte_digifacts_ajax_refresh() {
     check_ajax_referer('digibyte_digifacts_nonce', 'nonce');
-    // Fetch a new DigiFact
+    // Fetch a new set of DigiFacts
     $language = get_option('digibyte_digifacts_language', 'en');
     $facts = digibyte_digifacts_fetch_facts($language);
 
     if ($facts) {
-        $random_key = array_rand($facts);
-        $fact = $facts[$random_key];
+        // Sanitize each fact
+        foreach ($facts as $key => $fact) {
+            $facts[$key]['title'] = esc_html($fact['title']);
+            $facts[$key]['content'] = wp_kses_post($fact['content']);
+        }
 
-        $response = array(
-            'title' => esc_html($fact['title']),
-            'content' => wp_kses_post($fact['content']),
-        );
-
-        wp_send_json_success($response);
+        // Send all facts
+        wp_send_json_success($facts);
     } else {
         wp_send_json_error('No DigiFacts available at the moment.');
     }
