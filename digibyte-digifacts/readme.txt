@@ -1,6 +1,6 @@
 === Plugin Name ===
 Contributors: saltedlolly
-Donate link: https://github.com/saltedlolly/DigiByte-DigiFacts-Wordpress-Plugin
+Donate link: https://github.com/DigiNode-Tools/DigiByte-DigiFacts-Wordpress-Plugin
 Tags: digibyte, digifacts, crypto, blockchain
 Requires at least: 4.7
 Tested up to: 6.4.1
@@ -13,7 +13,7 @@ Display a random DigiFact - a fact about DigiByte - every 60 seconds using AJAX 
 
 == Description ==
 
-Plugin to display a random DigiFact every 60 seconds using AJAX and jquery. Learn more about DigiByte DigiFacts [here](https://github.com/saltedlolly/DigiByte-DigiFacts-JSON).
+Plugin to display a random DigiFact every 60 seconds using AJAX and jquery. Learn more about DigiByte DigiFacts [here](https://github.com/DigiNode-Tools/DigiByte-DigiFacts-JSON).
 
 ## Usage
 
@@ -21,7 +21,7 @@ User the [digifacts] shortcode or included gutenberg block to insert the DigiFac
 
 ## How this works
 
-* The current set of DigiFacts are retrieved from the remote web service (digifacts.digibyte.help) and cached on the Wordpress server once per hour
+* The current set of DigiFacts are retrieved from the remote web service (https://digifacts.diginode.tools) and cached on the Wordpress server once per hour
 * When a user visits the Wordpress site, the current set of DigiFacts are cached in the browser's local storage for 60 minutes. A random DigiFact is displayed.
 * Every 60 seconds the DigiFact displayed on the screen is refreshed with another random one.
 * If more than 60 minutes have passed, new DigiFacts are fetched via an AJAX call to the web server.
