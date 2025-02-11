@@ -1,10 +1,10 @@
 <?php
 /**
 * Plugin Name:   DigiByte DigiFacts
-* Plugin URI:    https://github.com/saltedlolly/DigiByte-DigiFacts-Wordpress-Plugin
+* Plugin URI:    https://github.com/DigiNode-Tools/DigiByte-DigiFacts-Wordpress-Plugin
 * Description:   Display random DigiFacts about DigiByte in multiple languages.
-* Version:       1.2
-* Author:        Olly Stedall (DigiByte.Help)
+* Version:       1.3
+* Author:        Olly Stedall (DigiNode.Tools)
 * Text Domain:   digibyte-digifacts
 */
 
@@ -21,7 +21,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with DigiByte DigiFacts. If not, see:
-https://github.com/saltedlolly/DigiByte-DigiFacts-Wordpress-Plugin
+https://github.com/DigiNode-Tools/DigiByte-DigiFacts-Wordpress-Plugin
 */
 
 add_action('admin_menu', 'digibyte_digifacts_admin_menu');
@@ -54,13 +54,13 @@ function digibyte_digifacts_settings_page() {
             <h3>Usage</h3>
             <p>To display DigiFacts on your site, use the shortcode <code>[digifacts]</code> in your posts or pages. You can also use the provided gutenberg block.</p>
             <img src="<?php echo esc_url($qrcode_url); ?>" alt="DigiByte DigiFacts Translation Fund QR Code" align="right"><h3>Please Contribute</h3>
-            <p>Please help DigiByte reach more people around the world by donating to the <a href="https://github.com/saltedlolly/DigiByte-DigiFacts-JSON#donate-to-the-digifacts-translation-fund" target="_blank">DigiFacts Translation Fund</a>.</p>
+            <p>Please help DigiByte reach more people around the world by donating to the <a href="https://github.com/DigiNode-Tools/DigiByte-DigiFacts-JSON#donate-to-the-digifacts-translation-fund" target="_blank">DigiFacts Translation Fund</a>.</p>
             <ul>
             <li>- For every 12,500 DGB that is donated, DigiFacts will be translated into five additional languages.</li>
             <li>- Anyone who donates 2500 DGB or more gets to choose a language to translate to.</li>
             </ul>
             <p>Donate here: <strong>dgb1qrgmuy24pj738tuc64wl30us9u8g2ywq3tclsjv</strong></p>
-            <p>You can also help by contributing new DigiFacts or helping to translate them yourself. Go <a href="https://github.com/saltedlolly/DigiByte-DigiFacts-JSON" target="_blank">here</a> to learn more.</p>
+            <p>You can also help by contributing new DigiFacts or helping to translate them yourself. Go <a href="https://github.com/DigiNode-Tools/DigiByte-DigiFacts-JSON" target="_blank">here</a> to learn more.</p>
             <h3>Styling the DigiFacts</h3>
     <p>You can style the DigiFacts title and content with CSS. Add custom styles to your theme's stylesheet or in the Customizer under Additional CSS.</p>
     <h4>General Styles</h4>
@@ -188,7 +188,7 @@ function digibyte_digifacts_sanitize_language($language_code) {
 
 
 function digibyte_digifacts_reload_languages() {
-    $response = wp_remote_get('https://digifacts.digibyte.help/?get_langs');
+    $response = wp_remote_get('https://digifacts.diginode.tools/?get_langs');
     
     if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
         $language_codes = json_decode(wp_remote_retrieve_body($response), true);
@@ -247,7 +247,7 @@ function digibyte_digifacts_fetch_facts($language) {
     $facts = get_transient($transient_key);
 
     if (false === $facts) {
-        $url = "https://digifacts.digibyte.help/?format=html&lang=" . $language;
+        $url = "https://digifacts.diginode.tools/?format=html&lang=" . $language;
         $response = wp_remote_get($url);
 
         if (is_wp_error($response)) {
